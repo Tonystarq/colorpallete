@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import Link from 'next/link'
 import Image from 'next/image'
 import Loader from './Loader'
-import { ClipboardCopy } from 'lucide-react'
+import { ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react'
 import { Skeleton } from "@/components/ui/skeleton"
 import {
     Select,
@@ -146,6 +146,30 @@ const Palletes = () => {
     toast.success('Color copied to clipboard!')
   }
 
+  const getGradientBackground = () => {
+    if (colors.length === 0) return {}
+    
+    if (colors.length === 1) {
+      return {
+        background: `linear-gradient(135deg, ${colors[0]}, white)`,
+      }
+    }
+
+    const gradientColors = colors.map((color, index) => {
+      const position = (index / (colors.length - 1)) * 100
+      return `${color} ${position}%`
+    }).join(', ')
+
+    return {
+      background: `linear-gradient(135deg, ${gradientColors})`,
+    }
+  }
+
+  const handleNumberChange = (increment) => {
+    const newValue = Math.min(10, Math.max(1, colorCount + increment))
+    setColorCount(newValue)
+  }
+
   return (
     <div className='flex flex-col gap-4 w-full justify-start items-center pt-8'>
       <div className="flex justify-between items-center w-full max-w-4xl px-4">
@@ -157,15 +181,41 @@ const Palletes = () => {
       
       <div className="flex flex-col gap-4 items-center w-full max-w-4xl min-h-[60vh]">
         <div className="flex gap-4 items-center">
-          <Input 
-            className='w-40' 
-            type='number' 
-            min="1"
-            max="10"
-            value={colorCount}
-            onChange={(e) => setColorCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-            placeholder='Number of colors'
-          />
+          <div className="flex flex-col items-center gap-1">
+            <div className="relative">
+              <Input 
+                className='w-40 pr-8' 
+                type='number' 
+                min="1"
+                max="10"
+                value={colorCount}
+                onChange={(e) => setColorCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                placeholder='Number of colors'
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col h-[calc(100%-8px)]">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-1/2 w-6 p-0 hover:bg-transparent"
+                  onClick={() => handleNumberChange(1)}
+                  disabled={colorCount >= 10}
+                >
+                  <ChevronUp className="h-3 w-3" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-1/2 w-6 p-0 hover:bg-transparent"
+                  onClick={() => handleNumberChange(-1)}
+                  disabled={colorCount <= 1}
+                >
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground">Min: 1, Max: 10</span>
+          </div>
+
           <Select value={colorFormat} onValueChange={setColorFormat}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Color format" />
@@ -253,19 +303,27 @@ const Palletes = () => {
             </div>
 
             {relatedImages.length > 0 && (
-              <div className="mt-8 w-full">
-                <h2 className="text-2xl font-bold mb-4">Related Images</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {relatedImages.map((photo) => (
-                    <div key={photo.id} className="relative aspect-video rounded-lg overflow-hidden">
-                      <Image
-                        src={photo.src.medium}
-                        alt={photo.alt}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
+              <div 
+                className="mt-8 w-full p-6 rounded-lg"
+                style={getGradientBackground()}
+              >
+                <div className="backdrop-blur-sm bg-white/10 p-4 rounded-lg">
+                  <h2 className="text-2xl font-bold mb-4 text-white drop-shadow-lg">Related Images</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {relatedImages.map((photo) => (
+                      <div 
+                        key={photo.id} 
+                        className="relative aspect-video rounded-lg overflow-hidden backdrop-blur-sm bg-white/10"
+                      >
+                        <Image
+                          src={photo.src.medium}
+                          alt={photo.alt}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
