@@ -1,9 +1,9 @@
 import Image from "next/image";
-
+import Palletes from "@/components/custom/Palletes";
 export default function Home() {
   return (
-  <div>
-  Manish Yadav
-  </div>
+    <div className="w-full h-full overflow-hidden">
+      <Palletes />
+    </div>
   );
 }
