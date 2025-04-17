@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import Link from 'next/link'
 import Image from 'next/image'
+import Loader from './Loader'
 import {
     Select,
     SelectContent,
@@ -19,6 +20,8 @@ const Palletes = () => {
   const [paletteName, setPaletteName] = useState('')
   const [colorFormat, setColorFormat] = useState('hex')
   const [relatedImages, setRelatedImages] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const convertColorFormat = (color) => {
     // Remove # if present
@@ -63,6 +66,7 @@ const Palletes = () => {
 
   const generateColors = async () => {
     try {
+      setIsLoading(true)
       const response = await fetch(`/api/generate-colors?count=${colorCount}`)
       const data = await response.json()
       console.log('Generated colors:', data.colors)
@@ -78,6 +82,8 @@ const Palletes = () => {
     } catch (error) {
       console.error('Error generating colors:', error)
       toast.error('Failed to generate colors')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -88,6 +94,7 @@ const Palletes = () => {
     }
 
     try {
+      setIsSaving(true)
       const response = await fetch('/api/save-palette', {
         method: 'POST',
         headers: {
@@ -109,6 +116,8 @@ const Palletes = () => {
     } catch (error) {
       console.error('Error saving palette:', error)
       toast.error('Failed to save palette')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -118,7 +127,7 @@ const Palletes = () => {
   }
 
   return (
-    <div className='flex flex-col gap-4 w-full justify-start items-center pt-8'>
+    <div className='flex flex-col gap-4 w-full min-h-screen justify-start items-center pt-8'>
       <div className="flex justify-between items-center w-full max-w-4xl px-4">
         <h1 className="text-4xl font-bold">Color Palette Generator</h1>
         <Link href="/saved">
@@ -126,7 +135,7 @@ const Palletes = () => {
         </Link>
       </div>
       
-      <div className="flex flex-col gap-4 items-center w-full max-w-4xl">
+      <div className="flex flex-col gap-4 items-center w-full max-w-4xl min-h-[60vh]">
         <div className="flex gap-4 items-center">
           <Input 
             className='w-40' 
@@ -151,8 +160,9 @@ const Palletes = () => {
             variant="outline" 
             className='cursor-pointer'
             onClick={generateColors}
+            disabled={isLoading}
           >
-            Generate Palette
+            {isLoading ? 'Generating...' : 'Generate Palette'}
           </Button>
         </div>
 
@@ -164,42 +174,52 @@ const Palletes = () => {
               value={paletteName}
               onChange={(e) => setPaletteName(e.target.value)}
             />
-            <Button onClick={savePalette}>Save Palette</Button>
+            <Button onClick={savePalette} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Palette'}
+            </Button>
           </div>
         )}
 
-        <div className="flex flex-wrap gap-4 justify-center mt-8">
-          {colors.map((color, index) => (
-            <div 
-              key={index}
-              className="flex flex-col items-center gap-2 cursor-pointer"
-              onClick={() => copyToClipboard(convertColorFormat(color))}
-            >
-              <div 
-                className="w-24 h-24 rounded-lg shadow-lg transition-transform hover:scale-105"
-                style={{ backgroundColor: color }}
-              />
-              <span className="text-sm font-mono">{convertColorFormat(color)}</span>
-            </div>
-          ))}
-        </div>
-
-        {relatedImages.length > 0 && (
-          <div className="mt-8 w-full">
-            <h2 className="text-2xl font-bold mb-4">Related Images</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relatedImages.map((photo) => (
-                <div key={photo.id} className="relative aspect-video rounded-lg overflow-hidden">
-                  <Image
-                    src={photo.src.medium}
-                    alt={photo.alt}
-                    fill
-                    className="object-cover"
+        {isLoading ? (
+          <div className="flex-1 w-full flex items-center justify-center">
+            <Loader />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-4 justify-center mt-8">
+              {colors.map((color, index) => (
+                <div 
+                  key={index}
+                  className="flex flex-col items-center gap-2 cursor-pointer"
+                  onClick={() => copyToClipboard(convertColorFormat(color))}
+                >
+                  <div 
+                    className="w-24 h-24 rounded-lg shadow-lg transition-transform hover:scale-105"
+                    style={{ backgroundColor: color }}
                   />
+                  <span className="text-sm font-mono">{convertColorFormat(color)}</span>
                 </div>
               ))}
             </div>
-          </div>
+
+            {relatedImages.length > 0 && (
+              <div className="mt-8 w-full">
+                <h2 className="text-2xl font-bold mb-4">Related Images</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {relatedImages.map((photo) => (
+                    <div key={photo.id} className="relative aspect-video rounded-lg overflow-hidden">
+                      <Image
+                        src={photo.src.medium}
+                        alt={photo.alt}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
