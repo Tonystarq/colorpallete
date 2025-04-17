@@ -1,11 +1,13 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import Link from 'next/link'
 import Image from 'next/image'
 import Loader from './Loader'
+import { ClipboardCopy } from 'lucide-react'
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     Select,
     SelectContent,
@@ -22,6 +24,7 @@ const Palletes = () => {
   const [relatedImages, setRelatedImages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [loadingState, setLoadingState] = useState('idle') // 'idle' | 'loader' | 'skeleton' | 'content'
 
   const convertColorFormat = (color) => {
     // Remove # if present
@@ -67,6 +70,12 @@ const Palletes = () => {
   const generateColors = async () => {
     try {
       setIsLoading(true)
+      setLoadingState('loader')
+      
+      // Show loader for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setLoadingState('skeleton')
+
       const response = await fetch(`/api/generate-colors?count=${colorCount}`)
       const data = await response.json()
       console.log('Generated colors:', data.colors)
@@ -79,9 +88,20 @@ const Palletes = () => {
       const pexelsData = await pexelsResponse.json()
       console.log('Pexels API response:', pexelsData)
       setRelatedImages(pexelsData.photos || [])
+
+      // Show skeleton for at least 1 second
+      const startTime = Date.now()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const elapsedTime = Date.now() - startTime
+      if (elapsedTime < 1000) {
+        await new Promise(resolve => setTimeout(resolve, 1000 - elapsedTime))
+      }
+
+      setLoadingState('content')
     } catch (error) {
       console.error('Error generating colors:', error)
       toast.error('Failed to generate colors')
+      setLoadingState('content')
     } finally {
       setIsLoading(false)
     }
@@ -127,7 +147,7 @@ const Palletes = () => {
   }
 
   return (
-    <div className='flex flex-col gap-4 w-full min-h-screen justify-start items-center pt-8'>
+    <div className='flex flex-col gap-4 w-full justify-start items-center pt-8'>
       <div className="flex justify-between items-center w-full max-w-4xl px-4">
         <h1 className="text-4xl font-bold">Color Palette Generator</h1>
         <Link href="/saved">
@@ -166,37 +186,67 @@ const Palletes = () => {
           </Button>
         </div>
 
-        {colors.length > 0 && (
-          <div className="flex gap-4 items-center w-full max-w-md">
-            <Input
-              className='flex-1'
-              placeholder='Name your palette (optional)'
-              value={paletteName}
-              onChange={(e) => setPaletteName(e.target.value)}
-            />
-            <Button onClick={savePalette} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Palette'}
-            </Button>
-          </div>
-        )}
-
-        {isLoading ? (
+        {loadingState === 'loader' && (
           <div className="flex-1 w-full flex items-center justify-center">
             <Loader />
           </div>
-        ) : (
+        )}
+
+        {loadingState === 'skeleton' && (
+          <div className="w-full space-y-8">
+            {/* Color Palette Skeleton */}
+            <div className="flex flex-wrap gap-4 justify-center">
+              {Array.from({ length: colorCount }).map((_, index) => (
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <Skeleton className="w-24 h-24 rounded-lg" />
+                  <Skeleton className="w-20 h-4" />
+                </div>
+              ))}
+            </div>
+
+            {/* Images Skeleton */}
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48 mx-auto" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Skeleton key={index} className="aspect-video rounded-lg" />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loadingState === 'content' && (
           <>
+            {colors.length > 0 && (
+              <div className="flex gap-4 items-center w-full max-w-md">
+                <Input
+                  className='flex-1'
+                  placeholder='Name your palette (optional)'
+                  value={paletteName}
+                  onChange={(e) => setPaletteName(e.target.value)}
+                />
+                <Button onClick={savePalette} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Palette'}
+                </Button>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-4 justify-center mt-8">
               {colors.map((color, index) => (
                 <div 
                   key={index}
-                  className="flex flex-col items-center gap-2 cursor-pointer"
+                  className="flex flex-col items-center gap-2 cursor-pointer group relative"
                   onClick={() => copyToClipboard(convertColorFormat(color))}
                 >
                   <div 
-                    className="w-24 h-24 rounded-lg shadow-lg transition-transform hover:scale-105"
+                    className="w-24 h-24 rounded-lg shadow-lg transition-transform hover:scale-105 relative"
                     style={{ backgroundColor: color }}
-                  />
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                      <ClipboardCopy className="w-6 h-6 text-white"/>
+                    </div>
+                  </div>
                   <span className="text-sm font-mono">{convertColorFormat(color)}</span>
                 </div>
               ))}
