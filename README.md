@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Color Palette Generator
 
-## Getting Started
+A beautiful and intuitive color palette generator that helps you create, save, and manage color palettes. The application allows you to generate color palettes, save them, and even find related images based on your color combinations.
 
-First, run the development server:
+## Features
 
+- Generate beautiful color palettes
+- Save and manage your palettes
+- View related images for your color combinations
+- Dark/Light mode support
+- Copy colors in different formats (HEX, RGB, HSL)
+- Add tags to your palettes
+- Responsive design
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- npm (v9 or higher)
+- Git
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Tonystarq/colorpallete.git
+cd colorpallete
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install --legacy-peer-deps
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file in the root directory with the following content:
+```env
+PEXELS_API_KEY=YOUR_PEXELS_API_KEY
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Replace `YOUR_PEXELS_API_KEY` with your actual Pexels API key. You can get one by:
+1. Go to [Pexels API](https://www.pexels.com/api/)
+2. Sign up for a free account
+3. Get your API key from your dashboard
 
-## Learn More
+## Running the Application
 
-To learn more about Next.js, take a look at the following resources:
+1. Start the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Demo Videos
 
-## Deploy on Vercel
+The repository includes several demo videos in the `data` folder:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. Basic Functionality Demo
+This video shows the main features of the application, including palette generation and color copying.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+https://github.com/Tonystarq/colorpallete/assets/your-user-id/Demo.mp4
+
+### 2. Environment Setup Demo
+This video demonstrates how to set up the environment variables and API keys.
+
+https://github.com/Tonystarq/colorpallete/assets/your-user-id/Demo2.mp4
+
+### 3. Data Storage Demo
+This video shows how the palettes are saved in the `palettes.json` file.
+
+https://github.com/Tonystarq/colorpallete/assets/your-user-id/Demo3.mp4
+
+## Project Structure
+
+```
+colorpallete/
+├── data/
+│   ├── palettes.json      # Stores saved color palettes
+│   ├── Demo.mp4          # Basic functionality demo
+│   ├── Demo2.mp4         # Environment setup demo
+│   └── Demo3.mp4         # Data storage demo
+├── public/               # Static assets
+├── src/
+│   ├── app/             # Next.js app directory
+│   ├── components/      # React components
+│   └── lib/            # Utility functions
+├── .env.local          # Environment variables
+├── package.json        # Project dependencies
+└── README.md          # This file
+```
+
+## API Endpoints
+
+- `/api/generate-colors` - Generates random color palettes
+- `/api/save-palette` - Saves color palettes
+- `/api/pexels` - Fetches related images from Pexels
+
+## Technologies Used
+
+- Next.js 15
+- React 19
+- Tailwind CSS
+- next-themes
+- Pexels API
+- Sonner (Toast notifications)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [Pexels](https://www.pexels.com/) for providing the image API
+- [Next.js](https://nextjs.org/) for the amazing framework
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
