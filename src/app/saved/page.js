@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { ClipboardCopy, Maximize2 } from 'lucide-react'
+import { ClipboardCopy, Maximize2, Palette, Sun, Moon, Trash2, Edit2, Tag, X, Plus } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import PaletteDialog from '@/components/custom/PaletteDialog'
+import { useTheme } from 'next-themes'
 
 const SavedPalettes = () => {
   const [palettes, setPalettes] = useState([])
@@ -20,6 +22,11 @@ const SavedPalettes = () => {
   const [colorFormat, setColorFormat] = useState('hex')
   const [selectedPalette, setSelectedPalette] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingPaletteId, setEditingPaletteId] = useState(null)
+  const [newPaletteName, setNewPaletteName] = useState('')
+  const [newTag, setNewTag] = useState('')
+  const { theme, setTheme } = useTheme()
+  const [tagInputs, setTagInputs] = useState({})
 
   useEffect(() => {
     fetchPalettes()
@@ -30,6 +37,12 @@ const SavedPalettes = () => {
       const response = await fetch('/api/save-palette')
       const data = await response.json()
       setPalettes(data.palettes)
+      // Initialize tag inputs for each palette
+      const initialTagInputs = {}
+      data.palettes.forEach(palette => {
+        initialTagInputs[palette.id] = ''
+      })
+      setTagInputs(initialTagInputs)
     } catch (error) {
       console.error('Error fetching palettes:', error)
       toast.error('Failed to load saved palettes')
@@ -89,6 +102,121 @@ const SavedPalettes = () => {
     setIsDialogOpen(true)
   }
 
+  const handleDeletePalette = async (paletteId) => {
+    try {
+      const response = await fetch(`/api/save-palette?id=${paletteId}`, {
+        method: 'DELETE',
+      })
+      const data = await response.json()
+      if (data.success) {
+        setPalettes(palettes.filter(p => p.id !== paletteId))
+        toast.success('Palette deleted successfully')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error deleting palette:', error)
+      toast.error('Failed to delete palette')
+    }
+  }
+
+  const handleRenamePalette = async (paletteId, newName) => {
+    try {
+      const response = await fetch('/api/save-palette', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: paletteId,
+          name: newName,
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setPalettes(palettes.map(p => 
+          p.id === paletteId ? { ...p, name: newName } : p
+        ))
+        setEditingPaletteId(null)
+        toast.success('Palette renamed successfully')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error renaming palette:', error)
+      toast.error('Failed to rename palette')
+    }
+  }
+
+  const handleAddTag = async (paletteId) => {
+    const newTag = tagInputs[paletteId]?.trim()
+    if (!newTag) return
+
+    try {
+      const palette = palettes.find(p => p.id === paletteId)
+      const updatedTags = [...(palette.tags || []), newTag]
+      
+      const response = await fetch('/api/save-palette', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: paletteId,
+          tags: updatedTags
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setPalettes(palettes.map(p => 
+          p.id === paletteId ? { ...p, tags: updatedTags } : p
+        ))
+        // Clear the input field for this specific palette
+        setTagInputs(prev => ({ ...prev, [paletteId]: '' }))
+        toast.success('Tag added successfully!')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error adding tag:', error)
+      toast.error('Failed to add tag')
+    }
+  }
+
+  const handleRemoveTag = async (paletteId, tagToRemove) => {
+    try {
+      const response = await fetch('/api/save-palette', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: paletteId,
+          tags: palettes.find(p => p.id === paletteId)?.tags?.filter(tag => tag !== tagToRemove) || [],
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setPalettes(palettes.map(p => 
+          p.id === paletteId ? { ...p, tags: p.tags?.filter(tag => tag !== tagToRemove) } : p
+        ))
+        toast.success('Tag removed successfully')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error removing tag:', error)
+      toast.error('Failed to remove tag')
+    }
+  }
+
+  const handleTagInputChange = (paletteId, value) => {
+    setTagInputs(prev => ({
+      ...prev,
+      [paletteId]: value
+    }))
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -100,7 +228,10 @@ const SavedPalettes = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Saved Palettes</h1>
+        <div className="flex items-center gap-3">
+          <Palette className="w-8 h-8 text-primary" />
+          <h1 className="text-4xl font-bold">Saved Palettes</h1>
+        </div>
         <div className="flex items-center gap-4">
           <Select value={colorFormat} onValueChange={setColorFormat}>
             <SelectTrigger className="w-[180px]">
@@ -112,6 +243,13 @@ const SavedPalettes = () => {
               <SelectItem value="hsl">HSL</SelectItem>
             </SelectContent>
           </Select>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
           <Link href="/">
             <Button variant="outline">Back to Generator</Button>
           </Link>
@@ -128,30 +266,76 @@ const SavedPalettes = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {palettes.map((palette) => (
-            <div key={palette.id} className="bg-white rounded-lg shadow-lg p-6">
+            <div 
+              key={palette.id} 
+              className="p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg group relative"
+            >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">{palette.name}</h2>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => handleFullScreen(palette)}
-                  className="hover:bg-gray-100"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
+                {editingPaletteId === palette.id ? (
+                  <div className="flex-1 flex gap-2">
+                    <Input
+                      value={newPaletteName}
+                      onChange={(e) => setNewPaletteName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleRenamePalette(palette.id, newPaletteName)
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        handleRenamePalette(palette.id, newPaletteName)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <h2 className="text-xl font-semibold">{palette.name}</h2>
+                )}
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => {
+                      setEditingPaletteId(palette.id)
+                      setNewPaletteName(palette.name)
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handleDeletePalette(palette.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handleFullScreen(palette)}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+
+              <div className="flex flex-wrap gap-2 mb-4">
                 {palette.colors.map((color, index) => (
                   <div
                     key={index}
-                    className="flex flex-col items-center cursor-pointer group relative"
+                    className="flex flex-col items-center cursor-pointer group/color relative"
                     onClick={() => copyToClipboard(color)}
                   >
                     <div
                       className="w-16 h-16 rounded-lg shadow-md transition-transform hover:scale-105 relative"
                       style={{ backgroundColor: color }}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/color:opacity-100 transition-opacity bg-black/20 rounded-lg">
                         <ClipboardCopy className="w-4 h-4 text-white"/>
                       </div>
                     </div>
@@ -159,7 +343,53 @@ const SavedPalettes = () => {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-4">
+
+              <div className="flex flex-wrap gap-2 mb-2">
+                {palette.tags?.map((tag, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full text-xs"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {tag}
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-4 w-4 p-0 hover:bg-transparent"
+                      onClick={() => handleRemoveTag(palette.id, tag)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  value={tagInputs[palette.id] || ''}
+                  onChange={(e) => handleTagInputChange(palette.id, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddTag(palette.id)
+                    }
+                  }}
+                  placeholder="Add tag..."
+                  className="flex-1 h-8"
+                />
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => {
+                    if (tagInputs[palette.id]?.trim()) {
+                      handleAddTag(palette.id)
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <p className="text-sm text-muted-foreground mt-4">
                 Created: {new Date(palette.createdAt).toLocaleDateString()}
               </p>
             </div>

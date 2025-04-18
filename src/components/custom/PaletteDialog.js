@@ -99,7 +99,7 @@ const PaletteDialog = ({ palette, isOpen, onClose }) => {
           <div 
             className="p-6 rounded-lg"
           >
-            <div className="backdrop-blur-sm bg-white/10 p-4 rounded-lg">
+            <div className="backdrop-blur-xl bg-white/10 p-4 rounded-lg">
               <h2 className="text-2xl font-bold mb-4  drop-shadow-lg">Related Images</h2>
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import Link from 'next/link'
 import Image from 'next/image'
 import Loader from './Loader'
-import { ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react'
+import { ClipboardCopy, ChevronUp, ChevronDown, Palette, Copy, Sun, Moon } from 'lucide-react'
 import { Skeleton } from "@/components/ui/skeleton"
 import {
     Select,
@@ -15,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { useTheme } from 'next-themes'
 
 const Palletes = () => {
   const [colors, setColors] = useState([])
@@ -24,7 +25,8 @@ const Palletes = () => {
   const [relatedImages, setRelatedImages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [loadingState, setLoadingState] = useState('idle') // 'idle' | 'loader' | 'skeleton' | 'content'
+  const [loadingState, setLoadingState] = useState('idle')
+  const { theme, setTheme } = useTheme()
 
   const convertColorFormat = (color) => {
     // Remove # if present
@@ -170,70 +172,91 @@ const Palletes = () => {
     setColorCount(newValue)
   }
 
+  const copyAllColors = () => {
+    const allColors = colors.map(color => convertColorFormat(color)).join('\n')
+    navigator.clipboard.writeText(allColors)
+    toast.success('All colors copied to clipboard!')
+  }
+
   return (
-    <div className='flex flex-col gap-4 w-full justify-start items-center pt-8'>
-      <div className="flex justify-between items-center w-full max-w-4xl px-4">
-        <h1 className="text-4xl font-bold">Color Palette Generator</h1>
-        <Link href="/saved">
-          <Button variant="outline">View Saved Palettes</Button>
-        </Link>
+    <div className='flex flex-col gap-8 w-full justify-start items-center pt-8 px-4'>
+      <div className="flex justify-between items-center w-full max-w-4xl">
+        <div className="flex items-center gap-3">
+          <Palette className="w-8 h-8 text-primary" />
+          <h1 className="text-4xl font-bold">Color Palette Generator</h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+          <Link href="/saved">
+            <Button variant="outline">View Saved Palettes</Button>
+          </Link>
+        </div>
       </div>
       
-      <div className="flex flex-col gap-4 items-center w-full max-w-4xl min-h-[60vh]">
-        <div className="flex gap-4 items-center">
-          <div className="flex flex-col items-center gap-1">
-            <div className="relative">
-              <Input 
-                className='w-40 pr-8' 
-                type='number' 
-                min="1"
-                max="10"
-                value={colorCount}
-                onChange={(e) => setColorCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                placeholder='Number of colors'
-              />
-              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col h-[calc(100%-8px)]">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-1/2 w-6 p-0 hover:bg-transparent"
-                  onClick={() => handleNumberChange(1)}
-                  disabled={colorCount >= 10}
-                >
-                  <ChevronUp className="h-3 w-3" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-1/2 w-6 p-0 hover:bg-transparent"
-                  onClick={() => handleNumberChange(-1)}
-                  disabled={colorCount <= 1}
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
+      <div className="flex flex-col gap-8 items-center w-full max-w-4xl min-h-[60vh]">
+        {/* Controls Card */}
+        <div className="w-full max-w-2xl p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative">
+                <Input 
+                  className='w-40 pr-8' 
+                  type='number' 
+                  min="1"
+                  max="10"
+                  value={colorCount}
+                  onChange={(e) => setColorCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                  placeholder='Number of colors'
+                />
+                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col h-[calc(100%-8px)]">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-1/2 w-6 p-0 hover:bg-transparent"
+                    onClick={() => handleNumberChange(1)}
+                    disabled={colorCount >= 10}
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-1/2 w-6 p-0 hover:bg-transparent"
+                    onClick={() => handleNumberChange(-1)}
+                    disabled={colorCount <= 1}
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
+              <span className="text-xs text-muted-foreground">Min: 1, Max: 10</span>
             </div>
-            <span className="text-xs text-muted-foreground">Min: 1, Max: 10</span>
-          </div>
 
-          <Select value={colorFormat} onValueChange={setColorFormat}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Color format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hex">HEX</SelectItem>
-              <SelectItem value="rgb">RGB</SelectItem>
-              <SelectItem value="hsl">HSL</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline" 
-            className='cursor-pointer'
-            onClick={generateColors}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Generating...' : 'Generate Palette'}
-          </Button>
+            <Select value={colorFormat} onValueChange={setColorFormat}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Color format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hex">HEX</SelectItem>
+                <SelectItem value="rgb">RGB</SelectItem>
+                <SelectItem value="hsl">HSL</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="default" 
+              className='cursor-pointer'
+              onClick={generateColors}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Generating...' : 'Generate Palette'}
+            </Button>
+          </div>
         </div>
 
         {loadingState === 'loader' && (
@@ -244,7 +267,6 @@ const Palletes = () => {
 
         {loadingState === 'skeleton' && (
           <div className="w-full space-y-8">
-            {/* Color Palette Skeleton */}
             <div className="flex flex-wrap gap-4 justify-center">
               {Array.from({ length: colorCount }).map((_, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
@@ -253,23 +275,49 @@ const Palletes = () => {
                 </div>
               ))}
             </div>
-
-            {/* Images Skeleton */}
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-48 mx-auto" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <Skeleton key={index} className="aspect-video rounded-lg" />
-                ))}
-              </div>
-            </div>
           </div>
         )}
 
-        {loadingState === 'content' && (
+        {loadingState === 'content' && colors.length > 0 && (
           <>
-            {colors.length > 0 && (
-              <div className="flex gap-4 items-center w-full max-w-md">
+            {/* Palette Display */}
+            <div className="w-full p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold">Generated Palette</h2>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={copyAllColors}
+                  className="flex items-center gap-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy All
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-4 justify-center">
+                {colors.map((color, index) => (
+                  <div 
+                    key={index}
+                    className="flex flex-col items-center gap-2 cursor-pointer group relative"
+                    onClick={() => copyToClipboard(convertColorFormat(color))}
+                  >
+                    <div 
+                      className="w-24 h-24 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl relative"
+                      style={{ backgroundColor: color }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                        <ClipboardCopy className="w-6 h-6 text-white"/>
+                      </div>
+                    </div>
+                    <span className="text-sm font-mono">{convertColorFormat(color)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Save Palette Card */}
+            <div className="w-full max-w-md p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
+              <div className="flex gap-4 items-center">
                 <Input
                   className='flex-1'
                   placeholder='Name your palette (optional)'
@@ -280,50 +328,27 @@ const Palletes = () => {
                   {isSaving ? 'Saving...' : 'Save Palette'}
                 </Button>
               </div>
-            )}
-
-            <div className="flex flex-wrap gap-4 justify-center mt-8">
-              {colors.map((color, index) => (
-                <div 
-                  key={index}
-                  className="flex flex-col items-center gap-2 cursor-pointer group relative"
-                  onClick={() => copyToClipboard(convertColorFormat(color))}
-                >
-                  <div 
-                    className="w-24 h-24 rounded-lg shadow-lg transition-transform hover:scale-105 relative"
-                    style={{ backgroundColor: color }}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
-                      <ClipboardCopy className="w-6 h-6 text-white"/>
-                    </div>
-                  </div>
-                  <span className="text-sm font-mono">{convertColorFormat(color)}</span>
-                </div>
-              ))}
             </div>
 
+            {/* Related Images */}
             {relatedImages.length > 0 && (
-              <div 
-                className="mt-8 w-full p-6 rounded-lg"
-                style={getGradientBackground()}
-              >
-                <div className="backdrop-blur-sm bg-white/10 p-4 rounded-lg">
-                  <h2 className="text-2xl font-bold mb-4 text-white drop-shadow-lg">Related Images</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {relatedImages.map((photo) => (
-                      <div 
-                        key={photo.id} 
-                        className="relative aspect-video rounded-lg overflow-hidden backdrop-blur-sm bg-white/10"
-                      >
-                        <Image
-                          src={photo.src.medium}
-                          alt={photo.alt}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
+              <div className="w-full p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
+                <h2 className="text-2xl font-semibold mb-6">Related Images</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {relatedImages.map((photo) => (
+                    <div 
+                      key={photo.id} 
+                      className="relative aspect-video rounded-lg overflow-hidden group"
+                    >
+                      <Image
+                        src={photo.src.medium}
+                        alt={photo.alt}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
