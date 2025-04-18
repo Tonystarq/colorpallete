@@ -57,17 +57,23 @@ The repository includes several demo videos in the `data` folder:
 ### 1. Basic Functionality Demo
 This video shows the main features of the application, including palette generation and color copying.
 
-https://github.com/Tonystarq/colorpallete/data/Demo1.mp4
+<video src="data/Demo1.mp4" controls width="100%">
+  Your browser does not support the video tag.
+</video>
 
 ### 2. Environment Setup Demo
 This video demonstrates how to set up the environment variables and API keys.
 
-https://github.com/Tonystarq/colorpallete/data/Demo2.mp4
+<video src="data/Demo2.mp4" controls width="100%">
+  Your browser does not support the video tag.
+</video>
 
 ### 3. Data Storage Demo
 This video shows how the palettes are saved in the `palettes.json` file.
 
-https://github.com/Tonystarq/colorpallete/data/Demo3.mp4
+<video src="data/Demo3.mp4" controls width="100%">
+  Your browser does not support the video tag.
+</video>
 
 ## Project Structure
 
