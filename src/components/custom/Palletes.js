@@ -27,6 +27,11 @@ const Palletes = () => {
   const [isSaving, setIsSaving] = useState(false)
   const [loadingState, setLoadingState] = useState('idle')
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const convertColorFormat = (color) => {
     // Remove # if present
@@ -174,7 +179,7 @@ const Palletes = () => {
             className='cursor-pointer'
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {mounted && (theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
           </Button>
           <Link href="/saved">
             <Button variant="outline" className='cursor-pointer'>View Saved Palettes</Button>
@@ -217,7 +222,7 @@ const Palletes = () => {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </div>
-             
+               
                 </div>
                 <span className="text-xs text-muted-foreground">Min: 1, Max: 5</span>
 

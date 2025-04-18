@@ -27,8 +27,10 @@ const SavedPalettes = () => {
   const [newTag, setNewTag] = useState('')
   const { theme, setTheme } = useTheme()
   const [tagInputs, setTagInputs] = useState({})
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     fetchPalettes()
   }, [])
 
@@ -249,7 +251,7 @@ const SavedPalettes = () => {
             className='cursor-pointer'
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {mounted && (theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
           </Button>
           <Link href="/">
             <Button variant="outline" className='cursor-pointer'>Back to Generator</Button>
