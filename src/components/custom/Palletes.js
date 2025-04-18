@@ -19,7 +19,7 @@ import { useTheme } from 'next-themes'
 
 const Palletes = () => {
   const [colors, setColors] = useState([])
-  const [colorCount, setColorCount] = useState(5)
+  const [colorCount, setColorCount] = useState(3)
   const [paletteName, setPaletteName] = useState('')
   const [colorFormat, setColorFormat] = useState('hex')
   const [relatedImages, setRelatedImages] = useState([])
@@ -148,27 +148,9 @@ const Palletes = () => {
     toast.success('Color copied to clipboard!')
   }
 
-  const getGradientBackground = () => {
-    if (colors.length === 0) return {}
-    
-    if (colors.length === 1) {
-      return {
-        background: `linear-gradient(135deg, ${colors[0]}, white)`,
-      }
-    }
-
-    const gradientColors = colors.map((color, index) => {
-      const position = (index / (colors.length - 1)) * 100
-      return `${color} ${position}%`
-    }).join(', ')
-
-    return {
-      background: `linear-gradient(135deg, ${gradientColors})`,
-    }
-  }
 
   const handleNumberChange = (increment) => {
-    const newValue = Math.min(10, Math.max(1, colorCount + increment))
+    const newValue = Math.min(5, Math.max(1, colorCount + increment))
     setColorCount(newValue)
   }
 
@@ -203,16 +185,16 @@ const Palletes = () => {
       <div className="flex flex-col gap-8 items-center w-full max-w-4xl min-h-[60vh]">
         {/* Controls Card */}
         <div className="w-full max-w-2xl p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+          <div className="flex flex-col md:flex-row gap-4 items-center md:items-start justify-center">
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
                 <Input 
                   className='w-40 pr-8' 
                   type='number' 
                   min="1"
-                  max="10"
+                  max="5"
                   value={colorCount}
-                  onChange={(e) => setColorCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                  onChange={(e) => setColorCount(Math.min(5, Math.max(1, parseInt(e.target.value) || 1)))}
                   placeholder='Number of colors'
                 />
                 <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col h-[calc(100%-8px)]">
@@ -221,7 +203,7 @@ const Palletes = () => {
                     size="icon" 
                     className="h-1/2 w-6 p-0 hover:bg-transparent"
                     onClick={() => handleNumberChange(1)}
-                    disabled={colorCount >= 10}
+                    disabled={colorCount >= 5}
                   >
                     <ChevronUp className="h-3 w-3" />
                   </Button>
@@ -235,8 +217,10 @@ const Palletes = () => {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </div>
-              </div>
-              <span className="text-xs text-muted-foreground">Min: 1, Max: 10</span>
+             
+                </div>
+                <span className="text-xs text-muted-foreground">Min: 1, Max: 5</span>
+
             </div>
 
             <Select value={colorFormat} onValueChange={setColorFormat}>
@@ -257,7 +241,9 @@ const Palletes = () => {
             >
               {isLoading ? 'Generating...' : 'Generate Palette'}
             </Button>
+            
           </div>
+        
         </div>
 
         {loadingState === 'loader' && (
@@ -314,10 +300,7 @@ const Palletes = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Save Palette Card */}
-            <div className="w-full max-w-md p-6 rounded-xl bg-background/80 backdrop-blur-sm border shadow-lg">
+              <div className="w-full max-w-md p-6 rounded-xl bg-background/80 mx-auto backdrop-blur-sm  shadow-lg">
               <div className="flex gap-4 items-center">
                 <Input
                   className='flex-1'
@@ -330,6 +313,10 @@ const Palletes = () => {
                 </Button>
               </div>
             </div>
+            </div>
+
+            {/* Save Palette Card */}
+          
 
             {/* Related Images */}
             {relatedImages.length > 0 && (

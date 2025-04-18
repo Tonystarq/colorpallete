@@ -261,7 +261,7 @@ const SavedPalettes = () => {
         <div className="text-center py-12">
           <p className="text-xl text-gray-600">No saved palettes yet</p>
           <Link href="/">
-            <Button className="mt-4">Generate Your First Palette</Button>
+            <Button className="mt-4 cursor-pointer">Generate Your First Palette</Button>
           </Link>
         </div>
       ) : (

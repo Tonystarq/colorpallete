@@ -42,30 +42,11 @@ const PaletteDialog = ({ palette, isOpen, onClose }) => {
     toast.success('Color copied to clipboard!')
   }
 
-  const getGradientBackground = () => {
-    if (palette.colors.length === 0) return {}
-    
-    if (palette.colors.length === 1) {
-      return {
-        background: `linear-gradient(135deg, ${palette.colors[0]}, white)`,
-      }
-    }
-
-    const gradientColors = palette.colors.map((color, index) => {
-      const position = (index / (palette.colors.length - 1)) * 100
-      return `${color} ${position}%`
-    }).join(', ')
-
-    return {
-      background: `linear-gradient(135deg, ${gradientColors})`,
-    }
-  }
-
   if (!palette) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl h-fit overflow-y-auto">
         <DialogHeader>
           <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl">{palette.name || 'Untitled Palette'}</DialogTitle>
