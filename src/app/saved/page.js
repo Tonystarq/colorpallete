@@ -246,12 +246,13 @@ const SavedPalettes = () => {
           <Button 
             variant="ghost" 
             size="icon"
+            className='cursor-pointer'
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
           <Link href="/">
-            <Button variant="outline">Back to Generator</Button>
+            <Button variant="outline" className='cursor-pointer'>Back to Generator</Button>
           </Link>
         </div>
       </div>
@@ -300,6 +301,7 @@ const SavedPalettes = () => {
                   <Button 
                     variant="ghost" 
                     size="icon"
+                    className='cursor-pointer'
                     onClick={() => {
                       setEditingPaletteId(palette.id)
                       setNewPaletteName(palette.name)
@@ -310,6 +312,7 @@ const SavedPalettes = () => {
                   <Button 
                     variant="ghost" 
                     size="icon"
+                    className='cursor-pointer'
                     onClick={() => handleDeletePalette(palette.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -317,6 +320,7 @@ const SavedPalettes = () => {
                   <Button 
                     variant="ghost" 
                     size="icon"
+                    className='cursor-pointer'
                     onClick={() => handleFullScreen(palette)}
                   >
                     <Maximize2 className="h-4 w-4" />
@@ -355,7 +359,7 @@ const SavedPalettes = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="h-4 w-4 p-0 hover:bg-transparent"
+                      className="h-4 w-4 p-0 hover:bg-transparent cursor-pointer"
                       onClick={() => handleRemoveTag(palette.id, tag)}
                     >
                       <X className="h-3 w-3" />
@@ -379,6 +383,7 @@ const SavedPalettes = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
+                  className='cursor-pointer'
                   onClick={() => {
                     if (tagInputs[palette.id]?.trim()) {
                       handleAddTag(palette.id)

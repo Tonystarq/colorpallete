@@ -189,12 +189,13 @@ const Palletes = () => {
           <Button 
             variant="ghost" 
             size="icon"
+            className='cursor-pointer'
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
           <Link href="/saved">
-            <Button variant="outline">View Saved Palettes</Button>
+            <Button variant="outline" className='cursor-pointer'>View Saved Palettes</Button>
           </Link>
         </div>
       </div>
@@ -288,7 +289,7 @@ const Palletes = () => {
                   variant="outline" 
                   size="sm"
                   onClick={copyAllColors}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 cursor-pointer"
                 >
                   <Copy className="h-4 w-4" />
                   Copy All
@@ -324,7 +325,7 @@ const Palletes = () => {
                   value={paletteName}
                   onChange={(e) => setPaletteName(e.target.value)}
                 />
-                <Button onClick={savePalette} disabled={isSaving}>
+                <Button onClick={savePalette} disabled={isSaving} className='cursor-pointer'>
                   {isSaving ? 'Saving...' : 'Save Palette'}
                 </Button>
               </div>
